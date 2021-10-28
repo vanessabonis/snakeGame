@@ -1,28 +1,47 @@
-const gameboard = document.getElementById('game-board');
+import { SNAKE_SPEED, update as updateSnake, draw as drawSnake, getSnakeHead, selfCollision as snakeSelfCollision } from './snake/index.js'
+import { draw as drawFood, update as updateFood } from './food/index.js'
+import { gameboard, isOutsideBoard } from './board/index.js';
 
-const SNAKE_SPEED = 5;
-var lastTimeRender = 0;
+let lastTimeRender = 0;
 
-//currentTime -> milliseconds
-function main(currentTime){
+function main(currentTime) {
+  if (checkGameOver()) {
+    if(confirm('Você Perdeu o Jogo')) {
+      window.location.reload();
+    } else {
+      window.requestAnimationFrame(main);
+    }
 
-    window.requestAnimationFrame(main) 
-    const secondsSinceLastRender = (currentTime = lastTimeRender)/1000
+    return;
+  }
 
-    //velocidade da cobra
-    if(secondsSinceLastRender < 1/SNAKE_SPEED) return;
-    lastTimeRender = currentTime;
-    update();
-    draw();
+  window.requestAnimationFrame(main);
 
+  const secondsSinceLastRender = (currentTime - lastTimeRender) / 1000;
+
+  if (secondsSinceLastRender < 1 / SNAKE_SPEED) return;
+
+  lastTimeRender = currentTime;
+
+  update();
+
+  draw();
 }
 
-function update(){
-
+function update() {
+  updateSnake();
+  updateFood();
+  checkGameOver();
 }
 
-function draw(){
-
+function draw() {
+  gameboard.innerHTML = '';
+  drawSnake(gameboard);
+  drawFood(gameboard);
 }
 
-window.requestAnimationFrame(main) 
+function checkGameOver() {
+  return isOutsideBoard(getSnakeHead()) || snakeSelfCollision();
+}
+
+window.requestAnimationFrame(main)
